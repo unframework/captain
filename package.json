@@ -1,0 +1,11 @@
+{
+  "name": "captain",
+  "version": "0.0.0",
+  "description": "Capture it again and again - DSLR timelapse capture over USB",
+  "main": "index.js",
+  "author": "Nick Matantsev <nick.matantsev@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "gphoto2": "^0.1.7"
+  }
+}
