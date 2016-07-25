@@ -78,21 +78,97 @@ function takePicture(camera) {
     });
 }
 
-findCamera().then(function (camera) {
-    return setCameraConfig(camera, 'capture', 'on');
-}).then(function (camera) {
-    return takePicture(camera).then(function (output) {
-        console.log('writing output size:', output.length);
-
-        // async file write on the side
-        fs.writeFile(__dirname + '/picture.jpg', output, function (err) {
-            if (err) {
-                throw new Error('got error writing file: ' + err);
+function previewPicture(camera) {
+    return new Promise(function (resolve, reject) {
+        camera.takePicture({
+            preview: true
+        }, function (er, output) {
+            if (er) {
+                reject(new Error('got preview error: ' + er));
+                return;
             }
 
-            console.log('wrote output file!');
+            resolve(output);
         });
+    });
+}
 
+function takeSeries(camera) {
+    var frameCount = 15;
+    var prefix = 'pic_' + new Date().getTime() + '_';
+    var counter = 0;
+
+    function doFrame() {
+        console.log('frame:', counter);
+
+        var fileName = __dirname + '/' + prefix + counter + '.jpg';
+
+        return takePicture(camera).then(function (output) {
+            console.log('writing output size:', output.length);
+
+            // async file write on the side
+            fs.writeFile(fileName, output, function (err) {
+                if (err) {
+                    throw new Error('got error writing file: ' + err);
+                }
+
+                console.log('wrote output file!');
+            });
+        }).then(function () {
+            return setCameraConfig(camera, 'manualfocusdrive', 'Near 3');
+        }).then(function () {
+            return setCameraConfig(camera, 'manualfocusdrive', 'None');
+        }).then(function () {
+            return setCameraConfig(camera, 'manualfocusdrive', 'Near 3');
+        }).then(function () {
+            return setCameraConfig(camera, 'manualfocusdrive', 'None');
+        });
+    }
+
+    return new Promise(function (resolve, reject) {
+        var currentOp = null;
+
+        var interval = setInterval(function () {
+            // track frame count and stop next invocation when needed
+            counter += 1;
+
+            if (counter > frameCount) {
+                clearInterval(interval);
+                resolve();
+                return;
+            }
+
+            if (currentOp !== null) {
+                throw new Error('operation in progress!');
+            }
+
+            currentOp = doFrame().then(function () {
+                currentOp = null;
+            }).catch(function (err) {
+                clearInterval(interval);
+                reject(err);
+            });
+        }, 5000);
+    });
+}
+
+findCamera().then(function (camera) {
+    // drop mirror to allow for remote focus drive
+    return previewPicture(camera).then(function (value) {
         return camera;
     });
+}).then(function (camera) {
+    return getCameraConfig(camera, 'autofocusdrive').then(function (value) {
+        if (value !== 0) {
+            console.log('turning off AF');
+            return setCameraConfig(camera, 'autofocusdrive', 0);
+        } else {
+            console.log('already turned off AF');
+            return camera;
+        }
+    });
+}).then(function (camera) {
+    return takeSeries(camera);
+}).catch(function (e) {
+    console.error(e);
 });
