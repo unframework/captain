@@ -20,6 +20,36 @@ function findCamera() {
     });
 }
 
+function walkSettingsMap(obj, cb) {
+    var keys = Object.keys(obj);
+    keys.forEach(function (key) {
+        var info = obj[key];
+
+        cb(key, info);
+
+        if (info.children) {
+            walkSettingsMap(info.children, cb);
+        }
+    });
+}
+
+function getCameraConfig(camera, name) {
+    return new Promise(function (resolve, reject) {
+        camera.getConfig(function (er, settings) {
+            var value = null;
+
+            walkSettingsMap(settings, function (key, info) {
+                if (key === name) {
+                    value = info.value;
+                    console.log(key + ':', info.label, '(' + info.type + (info.choices ? '; ' + info.choices.join(', ') : '') + ') =', info.value);
+                }
+            });
+
+            resolve(value);
+        });
+    });
+}
+
 function setCameraConfig(camera, name, value) {
     return new Promise(function (resolve, reject) {
         camera.setConfigValue(name, value, function (er) {
