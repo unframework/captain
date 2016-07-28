@@ -115,12 +115,12 @@ findCamera().then(function (camera) {
     var prefix = 'pic_' + new Date().getTime() + '_';
 
     return runSeries(3, function (counter) {
-        console.log('frame:', counter);
+        console.log(new Date(), 'frame:', counter);
 
         var fileName = prefix + counter + '.jpg';
 
         return storePicture(camera).then(function () {
-            console.log('done frame:', counter);
+            console.log(new Date(), 'done frame:', counter);
         });
     });
 }).catch(function (e) {
