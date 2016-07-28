@@ -4,6 +4,9 @@ var Promise = require('bluebird');
 
 var GPhoto = new gphoto2.GPhoto2();
 
+var frameCount = parseInt(process.argv[2], 10) || (function () { throw new Error('need frame count'); })();
+var delayMillis = parseInt(process.argv[3], 10) || (function () { throw new Error('need delay in millis'); })();
+
 function findCamera() {
     return new Promise(function (resolve, reject) {
         GPhoto.list(function (list) {
@@ -78,7 +81,7 @@ function storePicture(camera) {
     });
 }
 
-function runSeries(frameCount, doFrame) {
+function runSeries(frameCount, delayMillis, doFrame) {
     var counter = 0;
 
     return new Promise(function (resolve, reject) {
@@ -104,7 +107,7 @@ function runSeries(frameCount, doFrame) {
                 clearInterval(interval);
                 reject(err);
             });
-        }, 5000);
+        }, delayMillis);
     });
 }
 
@@ -114,7 +117,7 @@ findCamera().then(function (camera) {
 }).then(function (camera) {
     var prefix = 'pic_' + new Date().getTime() + '_';
 
-    return runSeries(3, function (counter) {
+    return runSeries(frameCount, delayMillis, function (counter) {
         console.log(new Date(), 'frame:', counter);
 
         var fileName = prefix + counter + '.jpg';
