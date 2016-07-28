@@ -63,6 +63,21 @@ function setCameraConfig(camera, name, value) {
     });
 }
 
+function storePicture(camera) {
+    return new Promise(function (resolve, reject) {
+        camera.takePicture({
+            download: false,
+        }, function (er) {
+            if (er) {
+                reject(new Error('got error: ' + er));
+                return;
+            }
+
+            resolve();
+        });
+    });
+}
+
 function takePicture(camera) {
     return new Promise(function (resolve, reject) {
         camera.takePicture({
@@ -94,35 +109,32 @@ function previewPicture(camera) {
 }
 
 function takeSeries(camera) {
-    var frameCount = 15;
+    var frameCount = 25;
     var prefix = 'pic_' + new Date().getTime() + '_';
     var counter = 0;
 
     function doFrame() {
         console.log('frame:', counter);
 
-        var fileName = __dirname + '/' + prefix + counter + '.jpg';
+        var fileName = prefix + counter + '.jpg';
+        var filePath = __dirname + '/' + filePath;
 
-        return takePicture(camera).then(function (output) {
-            console.log('writing output size:', output.length);
-
-            // async file write on the side
-            fs.writeFile(fileName, output, function (err) {
-                if (err) {
-                    throw new Error('got error writing file: ' + err);
-                }
-
-                console.log('wrote output file!');
-            });
-        }).then(function () {
-            return setCameraConfig(camera, 'manualfocusdrive', 'Near 3');
-        }).then(function () {
-            return setCameraConfig(camera, 'manualfocusdrive', 'None');
-        }).then(function () {
-            return setCameraConfig(camera, 'manualfocusdrive', 'Near 3');
-        }).then(function () {
-            return setCameraConfig(camera, 'manualfocusdrive', 'None');
+        return storePicture(camera).then(function () {
+            console.log('done frame:', counter);
         });
+
+        // return takePicture(camera).then(function (output) {
+        //     console.log('writing output size:', output.length);
+
+        //     // async file write on the side
+        //     fs.writeFile(filePath, output, function (err) {
+        //         if (err) {
+        //             throw new Error('got error writing file: ' + err);
+        //         }
+
+        //         console.log('wrote output file!');
+        //     });
+        // });
     }
 
     return new Promise(function (resolve, reject) {
@@ -153,20 +165,25 @@ function takeSeries(camera) {
 }
 
 findCamera().then(function (camera) {
-    // drop mirror to allow for remote focus drive
-    return previewPicture(camera).then(function (value) {
-        return camera;
-    });
+    return camera;
+    // // drop mirror to allow for remote focus drive
+    // return previewPicture(camera).then(function (value) {
+    //     return camera;
+    // });
 }).then(function (camera) {
-    return getCameraConfig(camera, 'autofocusdrive').then(function (value) {
-        if (value !== 0) {
-            console.log('turning off AF');
-            return setCameraConfig(camera, 'autofocusdrive', 0);
-        } else {
-            console.log('already turned off AF');
-            return camera;
-        }
-    });
+    // save files locally
+    return setCameraConfig(camera, 'capturetarget', 'Memory card'); // per http://gphoto-software.10949.n7.nabble.com/Problem-setting-capturetarget-on-Canon-G9-td13758.html
+}).then(function (camera) {
+    return camera;
+    // return getCameraConfig(camera, 'autofocusdrive').then(function (value) {
+    //     if (value !== 0) {
+    //         console.log('turning off AF');
+    //         return setCameraConfig(camera, 'autofocusdrive', 0);
+    //     } else {
+    //         console.log('already turned off AF');
+    //         return camera;
+    //     }
+    // });
 }).then(function (camera) {
     return takeSeries(camera);
 }).catch(function (e) {
