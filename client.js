@@ -6,19 +6,19 @@ vdomLive(function (renderLive, h) {
     var server = require('__server')();
     var af = new AFWeb(h);
 
-    currentCameraStatus = null;
+    currentCameraModel = null;
 
-    var whenCameraReady = server.getWhenCameraReady().then(function (cameraStatus) {
-        currentCameraStatus = cameraStatus;
+    var whenCameraReady = server.getWhenCameraReady().then(function (cameraModel) {
+        currentCameraModel = cameraModel;
     });
 
     var root = new af.topic('Do something with camera', function () {
         return new af.delay(whenCameraReady, 'Connecting to camera...', function () {
-            if (currentCameraStatus === null) {
+            if (currentCameraModel === null) {
                 return new af.status('Could not find camera');
             }
 
-            return new af.status('Camera loaded! ' + currentCameraStatus);
+            return new af.status('Camera loaded! ' + currentCameraModel);
         });
     });
 
