@@ -10,43 +10,56 @@ vdomLive(function (renderLive, h) {
         currentCameraStatus = cameraStatus;
     });
 
-    function getAffordances(af) {
-        return af.topic('Do something with camera', function () {
-            return af.delay(whenCameraReady, 'Connecting to camera...', function () {
-                if (currentCameraStatus === null) {
-                    return af.status('Could not find camera');
-                }
+    var root = new af.topic('Do something with camera', function () {
+        return new af.delay(whenCameraReady, 'Connecting to camera...', function () {
+            if (currentCameraStatus === null) {
+                return new af.status('Could not find camera');
+            }
 
-                return af.status('Camera loaded! ' + currentCameraStatus);
-            });
+            return new af.status('Camera loaded! ' + currentCameraStatus);
         });
-    }
+    });
 
     document.body.appendChild(renderLive(function () {
-        return getAffordances(af);
+        return root._renderVDom();
     }));
 });
 
-// @todo construct actual affordance state to render
 function AFWeb(h) {
     return {
         topic: function (display, bodyCb) {
-            return h('fieldset', [
-                h('legend', [ display ]),
-                bodyCb()
-            ]);
+            var body = bodyCb();
+
+            this._renderVDom = function () {
+                return h('fieldset', [
+                    h('legend', [ display ]),
+                    body._renderVDom()
+                ]);
+            };
         },
 
         delay: function (pendingPromise, display, bodyCb) {
-            return pendingPromise.isFulfilled()
-                ? bodyCb()
-                : h('div', [
-                    h('span', [ display ])
-                ]);
+            var body = null;
+            var isFulfilled = false;
+
+            pendingPromise.then(function () {
+                body = bodyCb();
+                isFulfilled = true;
+            });
+
+            this._renderVDom = function () {
+                return isFulfilled
+                    ? body._renderVDom()
+                    : h('div', [
+                        h('span', [ display ])
+                    ]);
+            };
         },
 
         status: function (display) {
-            return h('div', [ display ]);
+            this._renderVDom = function () {
+                return h('div', [ display ]);
+            };
         }
     };
 }
