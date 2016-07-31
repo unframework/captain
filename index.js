@@ -11,8 +11,12 @@ var whenCameraReady = findCamera().then(function (camera) {
 
 var server = {
     getWhenCameraReady: function () {
-        return whenCameraReady.finally(function () {
-            return currentCamera !== null ? currentCamera.model : null;
+        // returning failure to connect as non-error
+        // (to keep real transport errors distinct)
+        return whenCameraReady.then(function () {
+            return currentCamera.model;
+        }).catch(function () {
+            return null;
         });
     }
 };
