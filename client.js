@@ -1,5 +1,7 @@
 var vdomLive = require('vdom-live');
 
+var AFWeb = require('./lib/AFWeb');
+
 vdomLive(function (renderLive, h) {
     var server = require('__server')();
     var af = new AFWeb(h);
@@ -24,42 +26,3 @@ vdomLive(function (renderLive, h) {
         return root._renderVDom();
     }));
 });
-
-function AFWeb(h) {
-    return {
-        topic: function (display, bodyCb) {
-            var body = bodyCb();
-
-            this._renderVDom = function () {
-                return h('fieldset', [
-                    h('legend', [ display ]),
-                    body._renderVDom()
-                ]);
-            };
-        },
-
-        delay: function (pendingPromise, display, bodyCb) {
-            var body = null;
-            var isFulfilled = false;
-
-            pendingPromise.then(function () {
-                body = bodyCb();
-                isFulfilled = true;
-            });
-
-            this._renderVDom = function () {
-                return isFulfilled
-                    ? body._renderVDom()
-                    : h('div', [
-                        h('span', [ display ])
-                    ]);
-            };
-        },
-
-        status: function (display) {
-            this._renderVDom = function () {
-                return h('div', [ display ]);
-            };
-        }
-    };
-}
