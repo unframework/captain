@@ -15,10 +15,10 @@ vdomLive(function (renderLive, h) {
     var root = new af.topic('Do something with camera', function () {
         return new af.delay(whenCameraReady, 'Connecting to camera...', function () {
             if (currentCameraModel === null) {
-                return new af.status('Could not find camera');
+                return new af.outcome('Could not find camera');
             }
 
-            return new af.status('Camera loaded! ' + currentCameraModel);
+            return createMainScreen(af, server, currentCameraModel);
         });
     });
 
@@ -26,3 +26,11 @@ vdomLive(function (renderLive, h) {
         return root._renderVDom();
     }));
 });
+
+function createMainScreen(af, server, currentCameraModel) {
+    return new af.readout(function () {
+        return {
+            'Camera Model': currentCameraModel
+        }
+    });
+}
