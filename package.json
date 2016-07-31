@@ -7,6 +7,8 @@
   "license": "ISC",
   "dependencies": {
     "bluebird": "^3.4.1",
-    "gphoto2": "^0.1.7"
+    "gphoto2": "^0.1.7",
+    "remote-control": "^0.5.0",
+    "vdom-live": "^1.1.4"
   }
 }
