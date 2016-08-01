@@ -27,6 +27,24 @@ vdomLive(function (renderLive, h) {
     }));
 });
 
+function integerValue(v) {
+    var n = parseInt(v, 10);
+
+    if (n + '' !== v) {
+        throw new Error('integer required');
+    }
+
+    return n;
+}
+
+function positiveNumber(n) {
+    if (n <= 0) {
+        throw new Error('must be positive');
+    }
+
+    return n;
+}
+
 function createMainScreen(af, server, currentCameraModel) {
     var currentFrameCount = null;
     var currentDelayMillis = null;
@@ -51,8 +69,8 @@ function createMainScreen(af, server, currentCameraModel) {
     }, 500);
 
     var captureForm = new af.inputMap({
-        frameCount: new af.inputText(),
-        delayMillis: new af.inputText()
+        frameCount: new af.inputText(integerValue, positiveNumber),
+        delayMillis: new af.inputText(integerValue, positiveNumber)
     });
 
     return new af.group([
