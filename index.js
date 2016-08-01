@@ -9,6 +9,8 @@ var whenCameraReady = findCamera().then(function (camera) {
     currentCamera = camera;
 });
 
+var currentCaptureSeries = null;
+
 var server = {
     getWhenCameraReady: function () {
         // returning failure to connect as non-error
@@ -18,6 +20,17 @@ var server = {
         }).catch(function () {
             return null;
         });
+    },
+    getCaptureStatus: function () {
+        if (!currentCaptureSeries) {
+            return null;
+        }
+
+        return {
+            frameCount: currentCaptureSeries.frameCount,
+            delayMillis: currentCaptureSeries.delayMillis,
+            counter: currentCaptureSeries.counter
+        };
     }
 };
 

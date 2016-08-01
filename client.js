@@ -28,9 +28,38 @@ vdomLive(function (renderLive, h) {
 });
 
 function createMainScreen(af, server, currentCameraModel) {
+    var currentFrameCount = null;
+    var currentDelayMillis = null;
+    var currentCounter = null;
+
+    var statusIsPending = false; // @todo show this as spinner?
+
+    setInterval(function () {
+        if (statusIsPending) {
+            return;
+        }
+
+        statusIsPending = true;
+
+        server.getCaptureStatus().then(function (status) {
+            statusIsPending = false;
+
+            currentFrameCount = status ? status.frameCount : null;
+            currentDelayMillis = status ? status.delayMillis : null;
+            currentCounter = status ? status.counter : null;
+        });
+    }, 500);
+
     return new af.readout(function () {
         return {
-            'Camera Model': currentCameraModel
-        }
+            'Camera Model': currentCameraModel,
+            'Length': renderNullable(currentFrameCount, 'frame(s)'),
+            'Delay': renderNullable(currentDelayMillis, 'ms'),
+            'Counter': renderNullable(currentCounter, 'frame(s)')
+        };
     });
+}
+
+function renderNullable(amount, units) {
+    return amount !== null ? amount + ' ' + units : '--';
 }
