@@ -4,7 +4,7 @@ var RemoteControl = require('remote-control');
 
 var currentCamera = null;
 
-var whenCameraReady = require('./lib/findCamera').then(function (camera) {
+var whenCameraReady = require('./lib/findFauxCamera').then(function (camera) {
     console.log('found camera');
     currentCamera = camera;
 });
