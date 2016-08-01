@@ -50,6 +50,11 @@ function createMainScreen(af, server, currentCameraModel) {
         });
     }, 500);
 
+    var captureForm = new af.inputMap({
+        frameCount: new af.inputText(),
+        delayMillis: new af.inputText()
+    });
+
     return new af.group([
         new af.readout(function () {
             return {
@@ -61,12 +66,14 @@ function createMainScreen(af, server, currentCameraModel) {
         }),
         new af.action('Start Capture', function () {
             return currentFrameCount === null;
-        }, function () {
+        }, captureForm, function (data) {
+            console.log(data);
+
             return server.startCapture();
         }),
         new af.action('Stop Capture', function () {
             return currentFrameCount !== null;
-        }, function () {
+        }, null, function () {
             return server.stopCapture();
         })
     ]);
