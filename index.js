@@ -1,5 +1,4 @@
 var fs = require('fs');
-var gphoto2 = require('gphoto2');
 var Promise = require('bluebird');
 
 var GPhoto = new gphoto2.GPhoto2();
@@ -9,6 +8,8 @@ var delayMillis = parseInt(process.argv[3], 10) || (function () { throw new Erro
 
 function findCamera() {
     return new Promise(function (resolve, reject) {
+        var GPhoto = new require('gphoto2').GPhoto2();
+
         GPhoto.list(function (list) {
             if (list.length !== 1) {
                 reject(new Error('single camera expected'));
