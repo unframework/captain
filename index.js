@@ -64,9 +64,21 @@ var server = {
             counter: currentCaptureSeries.counter
         };
     },
-    startCapture: function () {
+    startCapture: function (frameCount, delayMillis) {
         if (currentCaptureSeries) {
             throw new Error('already capturing');
+        }
+
+        if (typeof frameCount !== 'number' || frameCount <= 0) {
+            throw new Error('bad input');
+        }
+
+        if (typeof delayMillis !== 'number' || frameCount <= 0) {
+            throw new Error('bad input');
+        }
+
+        if (delayMillis < 1000) {
+            throw new Error('shutter delay should be above one second');
         }
 
         currentCaptureSeries = new CaptureSeries(currentCamera, 100, 5000);

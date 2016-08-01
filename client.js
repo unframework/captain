@@ -84,10 +84,8 @@ function createMainScreen(af, server, currentCameraModel) {
         }),
         new af.action('Start Capture', function () {
             return currentFrameCount === null;
-        }, captureForm, function (data) {
-            console.log(data);
-
-            return server.startCapture();
+        }, captureForm, function (input) {
+            return server.startCapture(input.frameCount, input.delayMillis);
         }),
         new af.action('Stop Capture', function () {
             return currentFrameCount !== null;
