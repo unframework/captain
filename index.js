@@ -98,7 +98,8 @@ function runSeries(frameCount, delayMillis, doFrame) {
             }
 
             if (currentOp !== null) {
-                throw new Error('operation in progress!');
+                reject(new Error('operation in progress!'));
+                return;
             }
 
             currentOp = doFrame(counter).then(function () {
