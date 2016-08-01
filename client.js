@@ -50,14 +50,26 @@ function createMainScreen(af, server, currentCameraModel) {
         });
     }, 500);
 
-    return new af.readout(function () {
-        return {
-            'Camera Model': currentCameraModel,
-            'Length': renderNullable(currentFrameCount, 'frame(s)'),
-            'Delay': renderNullable(currentDelayMillis, 'ms'),
-            'Counter': renderNullable(currentCounter, 'frame(s)')
-        };
-    });
+    return new af.group([
+        new af.readout(function () {
+            return {
+                'Camera Model': currentCameraModel,
+                'Length': renderNullable(currentFrameCount, 'frame(s)'),
+                'Delay': renderNullable(currentDelayMillis, 'ms'),
+                'Counter': renderNullable(currentCounter, 'frame(s)')
+            };
+        }),
+        new af.action('Start Capture', function () {
+            return currentFrameCount === null;
+        }, function () {
+            return server.startCapture();
+        }),
+        new af.action('Stop Capture', function () {
+            return currentFrameCount !== null;
+        }, function () {
+            return server.stopCapture();
+        })
+    ]);
 }
 
 function renderNullable(amount, units) {

@@ -4,12 +4,44 @@ var RemoteControl = require('remote-control');
 
 var currentCamera = null;
 
-var whenCameraReady = findCamera().then(function (camera) {
+var whenCameraReady = require('./lib/findCamera').then(function (camera) {
     console.log('found camera');
     currentCamera = camera;
 });
 
 var currentCaptureSeries = null;
+
+function CaptureSeries(camera, frameCount, delayMillis) {
+    this.frameCount = frameCount;
+    this.delayMillis = delayMillis;
+    this.counter = 0;
+
+    this._stopSignal = false;
+
+    this.whenStopped = (function () {
+        // save files locally
+        return camera.setConfig('capturetarget', 'Memory card'); // per http://gphoto-software.10949.n7.nabble.com/Problem-setting-capturetarget-on-Canon-G9-td13758.html
+    })().then(function () {
+        return runSeries(frameCount, delayMillis, function (counter) {
+            if (this._stopSignal) {
+                throw new Error('capture interrupted!');
+            }
+
+            this.counter = counter;
+            console.log(new Date(), 'frame:', counter);
+
+            return camera.storePicture().then(function () {
+                console.log(new Date(), 'done frame:', counter);
+            });
+        }.bind(this));
+    }.bind(this)).catch(function (e) {
+        console.error(e);
+    });
+}
+
+CaptureSeries.prototype.stop = function () {
+    this._stopSignal = true;
+}
 
 var server = {
     getWhenCameraReady: function () {
@@ -31,6 +63,19 @@ var server = {
             delayMillis: currentCaptureSeries.delayMillis,
             counter: currentCaptureSeries.counter
         };
+    },
+    startCapture: function () {
+        if (currentCaptureSeries) {
+            throw new Error('already capturing');
+        }
+
+        currentCaptureSeries = new CaptureSeries(currentCamera, 100, 5000);
+        currentCaptureSeries.whenStopped.then(function () {
+            currentCaptureSeries = null;
+        });
+    },
+    stopCapture: function () {
+        currentCaptureSeries.stop();
     }
 };
 
@@ -58,7 +103,9 @@ function runSeries(frameCount, delayMillis, doFrame) {
                 return;
             }
 
-            currentOp = doFrame(counter).then(function () {
+            currentOp = Promise.resolve().then(function () {
+                return doFrame(counter);
+            }).then(function () {
                 currentOp = null;
             }).catch(function (err) {
                 clearInterval(interval);
