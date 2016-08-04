@@ -29,7 +29,7 @@ vdomLive(function (renderLive, h) {
         currentCameraModel = cameraModel;
     });
 
-    var root = new af.topic('Do something with camera', function () {
+    var root = new af.topic('Captain: Shutter Controller', function () {
         var requestedExit = false;
 
         return new af.group([
