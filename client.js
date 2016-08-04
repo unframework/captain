@@ -2,6 +2,23 @@ var vdomLive = require('vdom-live');
 
 var AFWeb = require('./lib/AFWeb');
 
+var viewportNode = document.createElement('meta');
+viewportNode.name = 'viewport';
+viewportNode.content = 'width = 480';
+document.head.appendChild(viewportNode);
+
+document.body.style.margin = 0;
+document.body.style.padding = 0;
+
+var rootNode = document.createElement('div');
+rootNode.style.width = '480px';
+rootNode.style.margin = 'auto';
+rootNode.style.padding = '5px';
+rootNode.style.background = '#fafefe';
+rootNode.style.fontFamily = 'Roboto, Arial, sans';
+rootNode.style.fontSize = '24px';
+document.body.appendChild(rootNode);
+
 vdomLive(function (renderLive, h) {
     var server = require('__server')();
     var af = new AFWeb(h);
@@ -31,7 +48,7 @@ vdomLive(function (renderLive, h) {
         ]);
     });
 
-    document.body.appendChild(renderLive(function () {
+    rootNode.appendChild(renderLive(function () {
         return root._renderVDom();
     }));
 });
