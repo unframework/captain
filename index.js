@@ -4,13 +4,14 @@ var RemoteControl = require('remote-control');
 
 var currentCamera = null;
 
-var whenCameraReady = require('./lib/findFauxCamera').then(function (camera) {
+var whenCameraReady = require('./lib/findCamera').then(function (camera) {
     console.log('found camera');
     currentCamera = camera;
 });
 
 var currentCaptureSeries = null;
 
+// @todo restart if camera not found
 function CaptureSeries(camera, frameCount, delayMillis) {
     this.frameCount = frameCount;
     this.delayMillis = delayMillis;
