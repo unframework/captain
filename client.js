@@ -78,8 +78,8 @@ function createMainScreen(af, server, currentCameraModel) {
     }, 500);
 
     var captureForm = new af.inputMap({
-        frameCount: new af.inputText(integerValue, positiveNumber),
-        delayMillis: new af.inputText(integerValue, positiveNumber)
+        frameCount: new af.inputText(integerValue, positiveNumber, { value: 1000 }),
+        delayMillis: new af.inputText(integerValue, positiveNumber, { value: 5000 })
     });
 
     return new af.group([
