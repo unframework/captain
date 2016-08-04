@@ -5,10 +5,14 @@
   "main": "index.js",
   "author": "Nick Matantsev <nick.matantsev@gmail.com>",
   "license": "ISC",
+  "scripts": {
+    "start": "node_modules/.bin/supervisor --poll-interval 30000 --ignore node_modules index.js"
+  },
   "dependencies": {
     "bluebird": "^3.4.1",
     "gphoto2": "^0.1.7",
     "remote-control": "^0.5.1",
+    "supervisor": "^0.11.0",
     "vdom-live": "^1.1.4"
   }
 }

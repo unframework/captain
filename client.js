@@ -13,13 +13,22 @@ vdomLive(function (renderLive, h) {
     });
 
     var root = new af.topic('Do something with camera', function () {
-        return new af.delay(whenCameraReady, 'Connecting to camera...', function () {
-            if (currentCameraModel === null) {
-                return new af.outcome('Could not find camera');
-            }
+        var requestedExit = false;
 
-            return createMainScreen(af, server, currentCameraModel);
-        });
+        return new af.group([
+            new af.action('Exit / Restart', function () { return !requestedExit; }, null, function () {
+                return server.exit().then(function () {
+                    requestedExit = true;
+                });
+            }),
+            new af.delay(whenCameraReady, 'Connecting to camera...', function () {
+                if (currentCameraModel === null) {
+                    return new af.outcome('Could not find camera');
+                }
+
+                return createMainScreen(af, server, currentCameraModel);
+            })
+        ]);
     });
 
     document.body.appendChild(renderLive(function () {

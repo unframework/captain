@@ -45,6 +45,9 @@ CaptureSeries.prototype.stop = function () {
 }
 
 var server = {
+    exit: function () {
+        process.exit();
+    },
     getWhenCameraReady: function () {
         // returning failure to connect as non-error
         // (to keep real transport errors distinct)
